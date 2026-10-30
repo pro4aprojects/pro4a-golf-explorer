@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PRO4A Golf">
+<meta name="apple-mobile-web-app-title" content="PRO4A Golf Explorer">
 </head>
 <body style="margin:0"><title>PRO4A Golf Explorer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -309,8 +309,10 @@
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(255, 255, 255, 0.22);
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-    border-radius: 999px; padding: 3px 6px 3px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px; padding: 5px 12px;
     font-size: 0.72rem; font-weight: 600; color: #fff;
+    cursor: pointer; font-family: inherit;
   }
   .score-chip input {
     width: 60px; border: none; border-radius: 999px;
@@ -736,6 +738,22 @@
   </div>
 </div>
 
+<!-- Score modal -->
+<div class="modal-back" id="scoreBack" hidden>
+  <div class="modal">
+    <h3>🏌️ Add Score</h3>
+    <p id="smCourse" style="font-size:0.84rem;color:var(--muted);margin:-8px 0 14px"></p>
+    <div class="pf-field">
+      <label for="smScore">Your score (strokes)</label>
+      <input type="number" id="smScore" min="1" max="200" placeholder="e.g. 88">
+    </div>
+    <div class="row">
+      <button class="btn btn-ghost" onclick="closeScoreModal()">Skip</button>
+      <button class="btn btn-green" onclick="saveScoreModal()">💾 Save Score</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ---------- Preset data ----------
 var INITIAL_PROVINCES = ['Cavite', 'Laguna', 'Batangas', 'Rizal', 'Quezon'];
@@ -765,9 +783,12 @@ var INITIAL_COURSES = [
   { id: 'r1', name: 'Valley Golf & Country Club', province: 'Rizal' },
   { id: 'r2', name: 'Forest Hills Golf & Country Club', province: 'Rizal' },
   { id: 'r3', name: 'Sun Valley Golf Club', province: 'Rizal' },
-  { id: 'r4', name: 'Eastridge Golf Club', province: 'Rizal' }
+  { id: 'r4', name: 'Eastridge Golf Club', province: 'Rizal' },
+  { id: 'q1', name: 'Graceland Estates and Country Club', province: 'Quezon' }
 ];
-var CARD_PHOTOS = ['course1.jpg', 'course2.jpg', 'course3.jpg'];
+var CARD_PHOTOS = ['course1.jpg', 'course2.jpg', 'course3.jpg', 'course4.jpg', 'course5.jpg'];
+// Real photos of specific courses (free-licensed only; Wikimedia Commons CC BY-SA 2.0 by lulaymb)
+var PRESET_PHOTOS = { c8: 'tagaytay-highlands.jpg' };
 
 // ---------- Storage (device-local only) ----------
 var STORAGE_KEY = 'pro4a-golf-explorer';
@@ -796,6 +817,12 @@ function loadState() {
       if (!state.activeGolferId && state.meId) state.activeGolferId = state.meId;
       if (!state.provinces.length) state.provinces = INITIAL_PROVINCES.slice();
       if (!state.courses.length) state.courses = INITIAL_COURSES.map(function (c) { return Object.assign({}, c); });
+      // Merge newly added preset courses (q*) into older saved data
+      INITIAL_COURSES.forEach(function (c) {
+        if (c.id.charAt(0) === 'q' && !state.courses.some(function (x) { return x.id === c.id; })) {
+          state.courses.push(Object.assign({}, c));
+        }
+      });
       return;
     } catch (e) {}
   }
@@ -823,6 +850,7 @@ function avatarHtml(g, sizeClass) {
   return '<span class="av ' + sizeClass + '">' + esc(initials(g ? g.name : '?')) + '</span>';
 }
 function photoFor(courseId) {
+  if (PRESET_PHOTOS[courseId]) return PRESET_PHOTOS[courseId];
   var h = 0;
   for (var i = 0; i < courseId.length; i++) h = (h * 31 + courseId.charCodeAt(i)) >>> 0;
   return CARD_PHOTOS[h % CARD_PHOTOS.length];
@@ -985,9 +1013,32 @@ function toggleCourse(courseId) {
   if (!gid) return;
   if (!state.rounds[gid]) state.rounds[gid] = {};
   var r = state.rounds[gid][courseId];
-  if (r && r.played) delete state.rounds[gid][courseId];
-  else state.rounds[gid][courseId] = { played: true, score: null };
+  var marking = !(r && r.played);
+  if (marking) state.rounds[gid][courseId] = { played: true, score: null };
+  else delete state.rounds[gid][courseId];
   saveState(); render();
+  if (marking) openScoreModal(courseId); // just played it: ask for the score
+}
+
+// ---------- Score modal ----------
+var scoreCourseId = null;
+function openScoreModal(courseId) {
+  scoreCourseId = courseId;
+  var c = findCourse(courseId);
+  var r = getRound(state.activeGolferId, courseId);
+  document.getElementById('smCourse').textContent = c ? c.name : '';
+  var input = document.getElementById('smScore');
+  input.value = (r && typeof r.score === 'number') ? r.score : '';
+  input.placeholder = 'e.g. 88';
+  document.getElementById('scoreBack').hidden = false;
+}
+function closeScoreModal() {
+  document.getElementById('scoreBack').hidden = true;
+  scoreCourseId = null;
+}
+function saveScoreModal() {
+  if (scoreCourseId) setScore(scoreCourseId, document.getElementById('smScore').value);
+  closeScoreModal();
 }
 function setScore(courseId, value) {
   var gid = state.activeGolferId;
@@ -1228,6 +1279,11 @@ function renderCourses() {
   renderFeatured();
   var wrap = document.getElementById('provincesWrap');
   var gid = state.activeGolferId;
+  // Remember each slider's scroll position so re-rendering doesn't jump back to the first card
+  var scrollPos = {};
+  [].forEach.call(wrap.querySelectorAll('.slider'), function (s) {
+    scrollPos[s.getAttribute('data-prov')] = s.scrollLeft;
+  });
   wrap.innerHTML = state.provinces.map(function (prov, pi) {
     var courses = state.courses.filter(function (c) { return c.province === prov; });
     var playedHere = 0;
@@ -1253,7 +1309,7 @@ function renderCourses() {
           (c.firstPlayed ? '<div class="cc-first">🗓 First played: ' + esc(c.firstPlayed) + '</div>' : '') +
           '<div class="cc-meta">' +
             (played
-              ? '<span class="score-chip">Score <input type="number" id="score-' + c.id + '" min="1" max="200" placeholder="—" value="' + scoreVal + '" onchange="setScore(\'' + c.id + '\', this.value)"></span>'
+              ? '<button class="score-chip" onclick="openScoreModal(\'' + c.id + '\')">' + (scoreVal !== '' ? '🏌️ Score: ' + scoreVal + ' ✎' : '＋ Add Score') + '</button>'
               : '') +
             (top ? '<span class="top-chip" title="Lowest score on this course">🏅 ' + top.score + ' · ' + esc(top.name) + '</span>' : '') +
           '</div>' +
@@ -1268,8 +1324,12 @@ function renderCourses() {
         '<span class="count-pill">' + playedHere + '/' + courses.length + '</span>' +
         '<button class="mini-btn danger" title="Remove province" onclick="deleteProvince(\'' + jsArg(prov) + '\')">✕</button>' +
       '</div>' +
-      '<div class="slider">' + cards + addCard + '</div>';
+      '<div class="slider" data-prov="' + cssId(prov) + '">' + cards + addCard + '</div>';
   }).join('');
+  [].forEach.call(wrap.querySelectorAll('.slider'), function (s) {
+    var pos = scrollPos[s.getAttribute('data-prov')];
+    if (pos) s.scrollLeft = pos;
+  });
 }
 
 function renderProgress() {
@@ -1391,6 +1451,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.getElementById('drNewGolfer').addEventListener('keydown', function (e) { if (e.key === 'Enter') addGolfer(); });
   document.getElementById('pmName').addEventListener('keydown', function (e) { if (e.key === 'Enter') saveProvinceModal(); });
+  document.getElementById('smScore').addEventListener('keydown', function (e) { if (e.key === 'Enter') saveScoreModal(); });
   document.getElementById('cmName').addEventListener('keydown', function (e) { if (e.key === 'Enter') saveCourseModal(); });
   document.getElementById('cmPhotoBtn').addEventListener('click', function () {
     document.getElementById('cmPhotoInput').click();
