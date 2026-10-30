@@ -1,0 +1,1424 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0d4a30">
+<title>PRO4A Golf Explorer</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PRO4A Golf">
+</head>
+<body style="margin:0"><title>PRO4A Golf Explorer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<style>
+  /* Layout: phone-shell mobile app — photo cards in snap sliders, glass surfaces, left drawer, 3 screens */
+  :root {
+    --bg: #e4efdc;
+    --bg2: #f4f8f0;
+    --ink: #17271d;
+    --muted: #55695c;
+    --glass: rgba(255, 255, 255, 0.62);
+    --glass-strong: rgba(255, 255, 255, 0.86);
+    --glass-border: rgba(255, 255, 255, 0.70);
+    --soft: rgba(23, 39, 29, 0.06);
+    --line: rgba(23, 39, 29, 0.14);
+    --accent: #2e7d54;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(46, 125, 84, 0.16);
+    --gold: #9a6d0a;
+    --gold-soft: rgba(240, 195, 80, 0.32);
+    --danger: #a93327;
+    --danger-soft: rgba(201, 72, 60, 0.14);
+    --shell-bg: linear-gradient(160deg, #96b97f, #d9e8cb 45%, #9cbc85);
+    --card-grad: linear-gradient(180deg, rgba(10, 25, 16, 0) 30%, rgba(8, 22, 14, 0.78) 100%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1711;
+      --bg2: #15211a;
+      --ink: #e9f1ea;
+      --muted: #9fb3a5;
+      --glass: rgba(18, 32, 24, 0.66);
+      --glass-strong: rgba(18, 32, 24, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --soft: rgba(255, 255, 255, 0.07);
+      --line: rgba(255, 255, 255, 0.14);
+      --accent: #4cb584;
+      --accent-ink: #07130c;
+      --accent-soft: rgba(76, 181, 132, 0.20);
+      --gold: #e3b54b;
+      --gold-soft: rgba(227, 181, 75, 0.22);
+      --danger: #e0695e;
+      --danger-soft: rgba(224, 105, 94, 0.16);
+      --shell-bg: linear-gradient(160deg, #0c130e, #182619 45%, #0c130e);
+      --card-grad: linear-gradient(180deg, rgba(5, 12, 8, 0.05) 25%, rgba(3, 9, 6, 0.85) 100%);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1711;
+    --bg2: #15211a;
+    --ink: #e9f1ea;
+    --muted: #9fb3a5;
+    --glass: rgba(18, 32, 24, 0.66);
+    --glass-strong: rgba(18, 32, 24, 0.88);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --soft: rgba(255, 255, 255, 0.07);
+    --line: rgba(255, 255, 255, 0.14);
+    --accent: #4cb584;
+    --accent-ink: #07130c;
+    --accent-soft: rgba(76, 181, 132, 0.20);
+    --gold: #e3b54b;
+    --gold-soft: rgba(227, 181, 75, 0.22);
+    --danger: #e0695e;
+    --danger-soft: rgba(224, 105, 94, 0.16);
+    --shell-bg: linear-gradient(160deg, #0c130e, #182619 45%, #0c130e);
+    --card-grad: linear-gradient(180deg, rgba(5, 12, 8, 0.05) 25%, rgba(3, 9, 6, 0.85) 100%);
+    color-scheme: dark;
+  }
+
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: var(--shell-bg) fixed, var(--bg);
+    color: var(--ink);
+    font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.45;
+  }
+
+  /* Phone shell */
+  .shell {
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 60%, var(--bg) 100%);
+    box-shadow: 0 0 60px rgba(8, 20, 13, 0.35);
+    position: relative;
+    overflow: hidden;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 32px;
+  }
+
+  .glass {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+  }
+
+  button { font-family: inherit; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: none; border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-green { background: var(--accent); color: var(--accent-ink); }
+  .btn-ghost { background: var(--soft); color: var(--ink); border: 1px solid var(--line); }
+  .btn-danger { background: var(--danger-soft); color: var(--danger); }
+  .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+
+  input[type="text"], input[type="number"], input[type="date"] {
+    border: 1.5px solid var(--line);
+    background: var(--glass-strong);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 9px 14px;
+    font-size: 16px; /* 16px+ stops mobile browsers from auto-zooming on focus */
+    font-family: inherit;
+    outline: none;
+    min-width: 0;
+  }
+  textarea {
+    border: 1.5px solid var(--line);
+    background: var(--glass-strong);
+    color: var(--ink);
+    border-radius: 16px;
+    padding: 10px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    width: 100%; box-sizing: border-box;
+    resize: vertical;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    display: flex; align-items: center; gap: 10px;
+    padding-block: calc(12px + env(safe-area-inset-top, 0px)) 10px;
+    position: relative; z-index: 5;
+  }
+  .icon-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; cursor: pointer; color: var(--ink);
+    flex-shrink: 0;
+    transition: transform 0.12s ease;
+  }
+  .icon-btn:active { transform: scale(0.92); }
+  .brand { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .brand img { width: 34px; height: 34px; object-fit: contain; }
+  .brand b { font-size: 0.95rem; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .av {
+    border-radius: 50%; object-fit: cover; flex-shrink: 0;
+    background: var(--accent-soft); color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; overflow: hidden;
+    border: 1.5px solid var(--glass-border);
+  }
+  .av-xs { width: 26px; height: 26px; font-size: 0.6rem; }
+  .av-sm { width: 34px; height: 34px; font-size: 0.72rem; }
+  .av-md { width: 42px; height: 42px; font-size: 0.85rem; }
+  .av-lg { width: 64px; height: 64px; font-size: 1.2rem; }
+  .av-xl { width: 96px; height: 96px; font-size: 1.8rem; }
+
+  /* ---------- Pill tabs ---------- */
+  .tabs {
+    display: flex; gap: 6px; padding: 5px;
+    border-radius: 999px; margin-bottom: 14px;
+  }
+  .tab {
+    flex: 1; border: none; background: transparent; color: var(--ink);
+    padding: 9px 4px; border-radius: 999px;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .tab.on { background: var(--glass-strong); box-shadow: 0 2px 10px rgba(8, 20, 13, 0.18); color: var(--accent); }
+
+  /* ---------- Screens ---------- */
+  .screen { display: none; }
+  .screen.on { display: block; animation: rise 0.35s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .tracking-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold-soft); color: var(--ink);
+    border-radius: 999px; padding: 5px 12px;
+    font-size: 0.76rem; font-weight: 600; margin-bottom: 12px;
+  }
+
+  /* Featured card */
+  .feat {
+    border-radius: 24px; overflow: hidden; position: relative;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px;
+    box-shadow: 0 10px 30px rgba(8, 20, 13, 0.2);
+    animation: rise 0.4s ease both;
+  }
+  .feat img.ph { width: 86px; height: 86px; border-radius: 18px; object-fit: cover; flex-shrink: 0; }
+  .feat .fx { flex: 1; min-width: 0; }
+  .feat .fx .hi { font-size: 0.78rem; color: var(--muted); }
+  .feat .fx b { display: block; font-size: 1.0rem; line-height: 1.3; overflow-wrap: anywhere; }
+  .feat .fx .cta { margin-top: 8px; }
+
+  /* Section heads */
+  .sec-head {
+    display: flex; align-items: center; gap: 8px;
+    margin: 4px 0 10px; flex-wrap: wrap;
+  }
+  .sec-head h2 { margin: 0; font-size: 1.02rem; flex: 1; min-width: 0; }
+  .count-pill {
+    font-size: 0.7rem; font-weight: 700;
+    background: var(--accent-soft); color: var(--ink);
+    padding: 3px 10px; border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+  }
+  .mini-btn {
+    border: 1px solid var(--line); background: var(--soft); color: var(--ink);
+    border-radius: 999px; padding: 4px 11px; font-size: 0.74rem; font-weight: 600; cursor: pointer;
+  }
+  .mini-btn.danger { color: var(--danger); }
+
+  /* ---------- Course sliders ---------- */
+  .slider {
+    display: flex; gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 2px 2px 14px;
+    margin: 0 -2px 6px;
+    scrollbar-width: none;
+  }
+  .slider::-webkit-scrollbar { display: none; }
+  .ccard {
+    position: relative;
+    min-width: 236px; max-width: 236px;
+    aspect-ratio: 4 / 4.6;
+    border-radius: 24px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    background-size: cover; background-position: center;
+    border: 1.5px solid var(--glass-border);
+    box-shadow: 0 10px 26px rgba(8, 20, 13, 0.22);
+    transition: transform 0.15s ease;
+  }
+  .ccard:active { transform: scale(0.97); }
+  .ccard .grad { position: absolute; inset: 0; background: var(--card-grad); }
+  .cc-top {
+    position: absolute; top: 10px; left: 10px; right: 10px;
+    display: flex; justify-content: space-between; align-items: center; z-index: 2;
+  }
+  .cc-del, .cc-edit {
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.35); color: #fff; font-size: 0.78rem;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .cc-first { font-size: 0.64rem; opacity: 0.85; margin-top: 2px; }
+  .cm-photo {
+    width: 100%; aspect-ratio: 16 / 10; border-radius: 18px;
+    border: 1.5px dashed var(--line);
+    background-color: var(--soft);
+    background-size: cover; background-position: center;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 0.84rem; font-weight: 600;
+    cursor: pointer; margin-bottom: 12px; text-align: center;
+  }
+  .cm-photo.has { border-style: solid; border-color: var(--glass-border); color: transparent; }
+  .cc-check {
+    width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    background: rgba(0, 0, 0, 0.3); color: transparent;
+    font-size: 1rem; font-weight: 800;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .cc-check:active { transform: scale(0.9); }
+  .ccard.played .cc-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .cc-body {
+    position: absolute; left: 14px; right: 14px; bottom: 12px; z-index: 2;
+    color: #fff;
+  }
+  .cc-prov { font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.85; }
+  .cc-name { font-weight: 700; font-size: 0.95rem; line-height: 1.3; margin-top: 2px; text-shadow: 0 1px 6px rgba(0,0,0,0.5); overflow-wrap: anywhere; }
+  .cc-meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .score-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border-radius: 999px; padding: 3px 6px 3px 10px;
+    font-size: 0.72rem; font-weight: 600; color: #fff;
+  }
+  .score-chip input {
+    width: 60px; border: none; border-radius: 999px;
+    padding: 2px 6px; font-size: 16px; text-align: center;
+    background: rgba(255, 255, 255, 0.9); color: #14301f;
+    font-variant-numeric: tabular-nums;
+  }
+  .top-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--gold-soft); color: #fff;
+    background: rgba(214, 164, 46, 0.85);
+    border-radius: 999px; padding: 4px 10px;
+    font-size: 0.68rem; font-weight: 700; white-space: nowrap;
+  }
+  .ccard.add {
+    display: flex; align-items: center; justify-content: center;
+    border: 2px dashed var(--line);
+    background: var(--soft); color: var(--muted);
+    cursor: pointer; box-shadow: none;
+    font-weight: 600; font-size: 0.86rem; text-align: center;
+  }
+  .ccard.add .plus { display: block; font-size: 1.6rem; color: var(--accent); }
+
+  .inline-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 0 0 14px; }
+  .inline-form input[type="text"] { flex: 1; min-width: 150px; }
+
+  .card {
+    border-radius: 24px; padding: 18px; margin-bottom: 14px;
+    box-shadow: 0 8px 24px rgba(8, 20, 13, 0.16);
+    animation: rise 0.4s ease both;
+  }
+
+  /* ---------- Progress screen ---------- */
+  .pr-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .pr-head .who { flex: 1; min-width: 130px; }
+  .pr-head .who b { font-size: 1.1rem; display: block; overflow-wrap: anywhere; }
+  .pr-head .who .sub { font-size: 0.78rem; color: var(--muted); }
+  .big-pct { font-size: 2rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .big-pct small { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+  .bar { height: 14px; background: var(--soft); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin-top: 6px; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--accent), #6fc396); border-radius: 999px; transition: width 0.8s cubic-bezier(.2,.8,.3,1); }
+  .pv-row { margin-bottom: 10px; }
+  .pv-row .pv-top { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; }
+  .pv-row .pv-top span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pv-row .bar { height: 9px; }
+  .played-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 16px; margin-bottom: 6px;
+    background: var(--soft); font-size: 0.85rem;
+  }
+  .played-row .nm { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+  .played-row .sc { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
+
+  /* ---------- Leaderboard ---------- */
+  .lb-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border-radius: 20px; margin-bottom: 8px;
+    animation: rise 0.4s ease both;
+  }
+  .lb-row.first { background: var(--gold-soft); border: 1px solid var(--glass-border); }
+  .lb-rank {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.8rem;
+    background: var(--accent-soft); color: var(--ink); flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .lb-row.first .lb-rank { background: var(--gold); color: #fff; }
+  .lb-name { font-weight: 700; flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 0.9rem; }
+  .lb-name .you { font-size: 0.68rem; color: var(--accent); font-weight: 700; }
+  .lb-count { font-size: 0.8rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .lb-count b { color: var(--accent); font-size: 0.95rem; }
+  .lb-x { border: none; background: none; color: var(--muted); opacity: 0.6; cursor: pointer; font-size: 0.9rem; padding: 4px; }
+
+  .empty-note { font-size: 0.84rem; color: var(--muted); font-style: italic; padding: 4px 0; }
+  .note-box { background: var(--accent-soft); color: var(--ink); border-radius: 16px; padding: 11px 14px; font-size: 0.8rem; margin-bottom: 14px; }
+
+  /* ---------- Drawer ---------- */
+  .drawer-back {
+    position: fixed; inset: 0; z-index: 90;
+    background: rgba(6, 14, 10, 0.5);
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
+  .drawer-back.on { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 95;
+    width: min(310px, 84vw);
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px);
+    border-right: 1px solid var(--glass-border);
+    transform: translateX(-104%);
+    transition: transform 0.3s cubic-bezier(.2,.8,.3,1);
+    overflow-y: auto;
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
+  }
+  .drawer.on { transform: none; }
+  .dr-me { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .dr-me .who { flex: 1; min-width: 0; }
+  .dr-me .who b { display: block; font-size: 0.98rem; overflow-wrap: anywhere; }
+  .dr-me .who span { font-size: 0.74rem; color: var(--muted); }
+  .dr-sec { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 18px 0 8px; }
+  .dr-link {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; text-align: left;
+    border: none; background: transparent; color: var(--ink);
+    padding: 11px 10px; border-radius: 14px;
+    font-size: 0.92rem; font-weight: 600; cursor: pointer;
+  }
+  .dr-link:hover, .dr-link.on { background: var(--accent-soft); color: var(--accent); }
+  .dr-golfer {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 14px;
+    cursor: pointer; font-size: 0.88rem; font-weight: 600;
+  }
+  .dr-golfer.on { background: var(--accent-soft); }
+  .dr-golfer .nm { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .dr-golfer .tick { color: var(--accent); font-weight: 800; opacity: 0; }
+  .dr-golfer.on .tick { opacity: 1; }
+  .dr-golfer .x { border: none; background: none; color: var(--muted); opacity: 0.6; cursor: pointer; font-size: 0.85rem; }
+  .dr-add { display: flex; gap: 6px; margin-top: 8px; }
+  .dr-add input { flex: 1; }
+
+  /* ---------- Modals ---------- */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(6, 14, 10, 0.55);
+    display: flex; align-items: center; justify-content: center; z-index: 150;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 16px;
+  }
+  .modal {
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px);
+    border: 1px solid var(--glass-border);
+    color: var(--ink);
+    border-radius: 26px;
+    padding: 22px; max-width: 380px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    animation: rise 0.3s ease both;
+  }
+  .modal p { margin: 0 0 16px; font-size: 0.92rem; }
+  .modal h3 { margin: 0 0 14px; font-size: 1.02rem; }
+  .modal .row { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  .pf-photo-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .pf-photo-wrap .hint { font-size: 0.76rem; color: var(--muted); }
+  .pf-field { margin-bottom: 10px; }
+  .pf-field label { display: block; font-size: 0.76rem; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .pf-field input { width: 100%; box-sizing: border-box; border-radius: 14px; }
+  #pfPhotoBtn { cursor: pointer; position: relative; }
+  #pfPhotoBtn::after {
+    content: "📷"; position: absolute; right: -2px; bottom: -2px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; border: 2px solid var(--glass-border);
+  }
+  #pfPhotoInput { display: none; }
+
+  /* ---------- Welcome / guide ---------- */
+  #guide {
+    position: fixed; inset: 0; z-index: 120;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+  .gw {
+    min-height: 100vh;
+    max-width: 480px; margin: 0 auto;
+    background-image: linear-gradient(180deg, rgba(8, 20, 13, 0.1) 35%, rgba(6, 16, 10, 0.86) 82%), url("hero.jpg");
+    background-size: cover; background-position: top center;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: calc(30px + env(safe-area-inset-top, 0px)) calc(38px + env(safe-area-inset-bottom, 0px));
+  }
+  .gw-card {
+    border-radius: 28px; padding: 22px; text-align: center;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: rise 0.5s ease both;
+  }
+  .gw-card img { width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
+  .gw-card .welcome { font-size: 0.78rem; letter-spacing: 0.26em; text-transform: uppercase; margin-top: 10px; }
+  .gw-card h1 { margin: 2px 0 0; font-size: 1.5rem; }
+  .gw-card p { margin: 8px auto 0; font-size: 0.86rem; color: #e3efe7; max-width: 38ch; }
+  .gw-card .btn { margin-top: 16px; width: 100%; padding: 14px; font-size: 0.95rem; }
+  .gs {
+    max-width: 480px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: calc(24px + env(safe-area-inset-top, 0px)) calc(40px + env(safe-area-inset-bottom, 0px));
+  }
+  .platform-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .platform-tab {
+    flex: 1; padding: 10px; border-radius: 999px;
+    border: 1.5px solid var(--line); background: var(--soft); color: var(--ink);
+    font-weight: 700; font-size: 0.88rem; cursor: pointer;
+  }
+  .platform-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: var(--accent); color: var(--accent-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.85rem;
+  }
+  .step-body { font-size: 0.9rem; min-width: 0; }
+  .step-body b { display: block; margin-bottom: 2px; }
+  .step-body .hint { color: var(--muted); font-size: 0.82rem; }
+  .kbd {
+    display: inline-block; background: var(--soft); border: 1px solid var(--line);
+    border-radius: 6px; padding: 1px 7px; font-size: 0.8rem; font-weight: 600;
+  }
+  .guide-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .guide-actions .btn { padding: 13px; font-size: 0.95rem; }
+
+  .credit { text-align: center; font-size: 0.68rem; color: var(--muted); margin-top: 16px; }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    .screen.on, .card, .feat, .lb-row, .modal, .gw-card { animation: none; }
+    .bar > div, .drawer, .drawer-back { transition: none; }
+  }
+</style>
+
+<!-- ================= WELCOME + INSTALL GUIDE (gate) ================= -->
+<div id="guide" hidden>
+  <div class="gw" id="guideWelcome">
+    <div class="gw-card">
+      <img src="logo.png" alt="PRO4A badge">
+      <div class="welcome">Welcome to</div>
+      <h1>PRO4A Golf Explorer</h1>
+      <p>Track every premier golf course across CALABARZON — right from your phone.</p>
+      <button class="btn btn-green" onclick="guideNext()">≫ &nbsp;Get Started</button>
+    </div>
+  </div>
+  <div class="gs" id="guideSteps" hidden>
+    <div class="card glass">
+      <h3 style="margin:0 0 12px">📲 Add it to your Home Screen first</h3>
+      <div class="platform-tabs">
+        <button class="platform-tab active" id="tabAndroid" onclick="showPlatform('android')">🤖 Android</button>
+        <button class="platform-tab" id="tabIphone" onclick="showPlatform('iphone')">🍎 iPhone / iPad</button>
+      </div>
+
+      <div id="stepsAndroid">
+        <div class="step"><span class="step-num">1</span><div class="step-body">
+          <b>Open the Chrome menu</b>
+          <span class="hint">Tap the <span class="kbd">⋮</span> (three dots) at the top right of the browser.</span>
+        </div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-body">
+          <b>Choose "Add to Home screen"</b>
+          <span class="hint">It may also appear as <span class="kbd">Install app</span>.</span>
+        </div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-body">
+          <b>Tap "Add"</b>
+          <span class="hint">The app icon will now appear on your home screen.</span>
+        </div></div>
+      </div>
+
+      <div id="stepsIphone" hidden>
+        <div class="step"><span class="step-num">1</span><div class="step-body">
+          <b>Open this page in Safari</b>
+          <span class="hint">Adding to the Home Screen only works from Safari.</span>
+        </div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-body">
+          <b>Tap the Share button</b>
+          <span class="hint">The <span class="kbd">⬆ Share</span> icon at the bottom (or top) of the screen.</span>
+        </div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-body">
+          <b>Choose "Add to Home Screen"</b>
+          <span class="hint">Scroll down the list, then tap <span class="kbd">Add</span>. The app icon will now appear on your home screen.</span>
+        </div></div>
+      </div>
+
+      <div class="note-box">
+        🔒 <b>This app has no database.</b> Everything is saved <b>only on this device</b> — one profile per device, and other phones keep their own records. Don't clear your browser data, or your progress will be erased.
+      </div>
+
+      <div class="guide-actions">
+        <button class="btn btn-green" id="btnInstallNow" hidden onclick="installNow()">⬇️ Install App Now</button>
+        <button class="btn btn-green" id="btnProceed" onclick="finishGuide()">✓ I've added it — Continue</button>
+        <button class="btn btn-ghost" id="btnDesktop" onclick="finishGuide()" hidden>I'm on a computer — Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div class="shell" id="app" hidden>
+
+  <div class="topbar">
+    <button class="icon-btn glass" onclick="toggleDrawer(true)" title="Menu">☰</button>
+    <div class="brand"><img src="logo.png" alt=""><b>PRO4A Golf Explorer</b></div>
+    <span id="topAvatar" style="cursor:pointer" onclick="openProfile()" title="My profile"></span>
+  </div>
+
+  <div class="tabs glass" role="tablist">
+    <button class="tab on" id="tabCourses" onclick="showScreen('courses')">⛳ Courses</button>
+    <button class="tab" id="tabProgress" onclick="showScreen('progress')">📊 Progress</button>
+    <button class="tab" id="tabLeaders" onclick="showScreen('leaders')">🏆 Leaderboard</button>
+  </div>
+
+  <!-- Courses screen -->
+  <div class="screen on" id="screenCourses">
+    <div id="trackingChip"></div>
+    <div class="feat glass" id="featCard"></div>
+    <div id="provincesWrap"></div>
+    <div class="card glass" style="display:flex;align-items:center;gap:10px">
+      <h2 style="margin:0;font-size:1.02rem;flex:1">📍 Provinces</h2>
+      <button class="btn btn-green btn-sm" onclick="openProvinceModal()">+ Add Province</button>
+    </div>
+    <div class="credit">Photos: Pexels free license</div>
+  </div>
+
+  <!-- Progress screen -->
+  <div class="screen" id="screenProgress"></div>
+
+  <!-- Leaderboard screen -->
+  <div class="screen" id="screenLeaders"></div>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-back" id="drawerBack" onclick="toggleDrawer(false)"></div>
+<nav class="drawer" id="drawer" aria-label="Menu">
+  <div class="dr-me" id="drawerMe"></div>
+  <button class="btn btn-ghost btn-sm" style="width:100%" onclick="toggleDrawer(false);openProfile()">👤 Edit My Profile</button>
+
+  <div class="dr-sec">Screens</div>
+  <button class="dr-link" onclick="toggleDrawer(false);showScreen('courses')">⛳ Golf Courses</button>
+  <button class="dr-link" onclick="toggleDrawer(false);showScreen('progress')">📊 Course Progress</button>
+  <button class="dr-link" onclick="toggleDrawer(false);showScreen('leaders')">🏆 Leaderboard</button>
+
+  <div class="dr-sec">Golfers — checking for:</div>
+  <div id="drawerGolfers"></div>
+  <div class="dr-add">
+    <input type="text" id="drNewGolfer" placeholder="Add golfer..." maxlength="30">
+    <button class="btn btn-green btn-sm" onclick="addGolfer()">+</button>
+  </div>
+
+  <div class="dr-sec">App</div>
+  <button class="dr-link" onclick="toggleDrawer(false);openGuide()">📲 Install guide</button>
+  <button class="dr-link" style="color:var(--danger)" onclick="toggleDrawer(false);resetAll()">🔄 Reset everything</button>
+</nav>
+
+<!-- Confirm modal -->
+<div class="modal-back" id="modalBack" hidden>
+  <div class="modal">
+    <p id="modalMsg"></p>
+    <div class="row">
+      <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+      <button class="btn btn-danger" id="modalOk">Yes, continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile modal (device profile — one per device) -->
+<div class="modal-back" id="profileBack" hidden>
+  <div class="modal">
+    <h3 id="pfTitle">👤 My Profile</h3>
+    <p id="pfIntro" style="font-size:0.8rem;color:var(--muted)">One profile per device — this is you on this phone.</p>
+    <div class="pf-photo-wrap">
+      <span id="pfPhotoBtn" title="Change photo"></span>
+      <input type="file" id="pfPhotoInput" accept="image/*">
+      <span class="hint">Tap the photo to change it</span>
+    </div>
+    <div class="pf-field">
+      <label for="pfName">Full name</label>
+      <input type="text" id="pfName" maxlength="40" placeholder="e.g. Juan Dela Cruz">
+    </div>
+    <div class="pf-field">
+      <label for="pfHandicap">Handicap</label>
+      <input type="number" id="pfHandicap" min="0" max="54" placeholder="e.g. 18">
+    </div>
+    <div class="pf-field">
+      <label for="pfClub">Home club</label>
+      <input type="text" id="pfClub" maxlength="60" placeholder="e.g. Eagle Ridge G&CC">
+    </div>
+    <div class="row">
+      <button class="btn btn-ghost" id="pfCancel" onclick="closeProfile()">Cancel</button>
+      <button class="btn btn-green" onclick="saveProfile()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Course modal (add / edit) -->
+<div class="modal-back" id="courseBack" hidden>
+  <div class="modal">
+    <h3 id="cmTitle">⛳ Add Golf Course</h3>
+    <p id="cmProv" style="font-size:0.8rem;color:var(--muted);margin:-8px 0 12px"></p>
+    <div class="cm-photo" id="cmPhotoBtn" role="button" tabindex="0">📷 Tap to add a thumbnail photo</div>
+    <input type="file" id="cmPhotoInput" accept="image/*" style="display:none">
+    <div class="pf-field">
+      <label for="cmName">Golf course name</label>
+      <input type="text" id="cmName" maxlength="80" placeholder="e.g. Eagle Ridge Golf and Country Club">
+    </div>
+    <div class="pf-field">
+      <label for="cmFirst">First played (optional)</label>
+      <input type="date" id="cmFirst">
+    </div>
+    <div class="pf-field">
+      <label for="cmNotes">Notes (optional)</label>
+      <textarea id="cmNotes" rows="2" maxlength="200" placeholder="e.g. First trial round with the team..."></textarea>
+    </div>
+    <div class="row">
+      <button class="btn btn-ghost" onclick="closeCourseModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveCourseModal()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Province modal -->
+<div class="modal-back" id="provBack" hidden>
+  <div class="modal">
+    <h3>📍 Add Province</h3>
+    <div class="pf-field">
+      <label for="pmName">Province name</label>
+      <input type="text" id="pmName" maxlength="40" placeholder="e.g. Bulacan">
+    </div>
+    <div class="row">
+      <button class="btn btn-ghost" onclick="closeProvinceModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveProvinceModal()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- Preset data ----------
+var INITIAL_PROVINCES = ['Cavite', 'Laguna', 'Batangas', 'Rizal', 'Quezon'];
+var INITIAL_COURSES = [
+  { id: 'c1', name: 'Eagle Ridge Golf and Country Club', province: 'Cavite' },
+  { id: 'c2', name: 'The Orchard Golf & Country Club', province: 'Cavite' },
+  { id: 'c3', name: 'Manila Southwoods Golf and Country Club', province: 'Cavite' },
+  { id: 'c4', name: 'Sherwood Hills Golf Club', province: 'Cavite' },
+  { id: 'c5', name: 'South Forbes Golf Club', province: 'Cavite' },
+  { id: 'c6', name: 'The Riviera Golf Club', province: 'Cavite' },
+  { id: 'c7', name: 'Puerto Azul Golf & Country Club', province: 'Cavite' },
+  { id: 'c8', name: 'Tagaytay Highlands International Golf Club', province: 'Cavite' },
+  { id: 'c9', name: 'Tagaytay Midlands Golf Club', province: 'Cavite' },
+  { id: 'l1', name: 'Ayala Greenfield Golf and Leisure Club', province: 'Laguna' },
+  { id: 'l2', name: 'Canlubang Golf and Country Club', province: 'Laguna' },
+  { id: 'l3', name: 'The Country Club Philippines', province: 'Laguna' },
+  { id: 'l4', name: 'Sta. Elena Golf and Country Estate', province: 'Laguna' },
+  { id: 'l5', name: 'Caliraya Springs Golf and Marina Leisure', province: 'Laguna' },
+  { id: 'l6', name: 'KC Filipinas Golf Resort Club', province: 'Laguna' },
+  { id: 'b1', name: 'Splendido Taal Golf Club', province: 'Batangas' },
+  { id: 'b2', name: 'Mount Malarayat Golf & Country Club', province: 'Batangas' },
+  { id: 'b3', name: 'Summit Point Golf & Country Club', province: 'Batangas' },
+  { id: 'b4', name: 'Calatagan Golf Club', province: 'Batangas' },
+  { id: 'b5', name: 'Club Punta Fuego', province: 'Batangas' },
+  { id: 'b6', name: 'Fernando Airbase Golf and Country Club', province: 'Batangas' },
+  { id: 'b7', name: 'Canyon Woods Resort Club', province: 'Batangas' },
+  { id: 'r1', name: 'Valley Golf & Country Club', province: 'Rizal' },
+  { id: 'r2', name: 'Forest Hills Golf & Country Club', province: 'Rizal' },
+  { id: 'r3', name: 'Sun Valley Golf Club', province: 'Rizal' },
+  { id: 'r4', name: 'Eastridge Golf Club', province: 'Rizal' }
+];
+var CARD_PHOTOS = ['course1.jpg', 'course2.jpg', 'course3.jpg'];
+
+// ---------- Storage (device-local only) ----------
+var STORAGE_KEY = 'pro4a-golf-explorer';
+var GUIDE_KEY = 'pro4a-golf-guide-done';
+
+function storeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+function storeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+function storeDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+var state = {
+  meId: null,           // the single device profile's golfer id
+  golfers: [],          // [{id, name, photo?, handicap?, club?}] — photo/info only on me
+  activeGolferId: null, // whose checklist is being edited
+  provinces: [],
+  courses: [],
+  rounds: {}
+};
+
+function loadState() {
+  var raw = storeGet(STORAGE_KEY);
+  if (raw) {
+    try {
+      var saved = JSON.parse(raw);
+      state = Object.assign(state, saved);
+      if (!state.meId && state.golfers.length) state.meId = state.golfers[0].id;
+      if (!state.activeGolferId && state.meId) state.activeGolferId = state.meId;
+      if (!state.provinces.length) state.provinces = INITIAL_PROVINCES.slice();
+      if (!state.courses.length) state.courses = INITIAL_COURSES.map(function (c) { return Object.assign({}, c); });
+      return;
+    } catch (e) {}
+  }
+  state.provinces = INITIAL_PROVINCES.slice();
+  state.courses = INITIAL_COURSES.map(function (c) { return Object.assign({}, c); });
+}
+function saveState() { storeSet(STORAGE_KEY, JSON.stringify(state)); }
+
+// ---------- Helpers ----------
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
+function jsArg(s) { return esc(s).replace(/'/g, "\\'"); }
+function cssId(s) { return s.replace(/[^a-zA-Z0-9]/g, '_'); }
+function initials(name) {
+  var parts = String(name || '?').trim().split(/\s+/);
+  var a = parts[0] ? parts[0][0] : '?';
+  var b = parts.length > 1 ? parts[parts.length - 1][0] : '';
+  return (a + b).toUpperCase();
+}
+function avatarHtml(g, sizeClass) {
+  if (g && g.photo) return '<img class="av ' + sizeClass + '" src="' + g.photo + '" alt="">';
+  return '<span class="av ' + sizeClass + '">' + esc(initials(g ? g.name : '?')) + '</span>';
+}
+function photoFor(courseId) {
+  var h = 0;
+  for (var i = 0; i < courseId.length; i++) h = (h * 31 + courseId.charCodeAt(i)) >>> 0;
+  return CARD_PHOTOS[h % CARD_PHOTOS.length];
+}
+function findGolfer(id) {
+  for (var i = 0; i < state.golfers.length; i++) if (state.golfers[i].id === id) return state.golfers[i];
+  return null;
+}
+function me() { return findGolfer(state.meId); }
+function activeGolfer() { return findGolfer(state.activeGolferId) || me(); }
+
+function getRound(golferId, courseId) { return (state.rounds[golferId] || {})[courseId] || null; }
+function playedCount(golferId) {
+  var r = state.rounds[golferId] || {};
+  return state.courses.filter(function (c) { return r[c.id] && r[c.id].played; }).length;
+}
+function topScoreFor(courseId) {
+  var best = null;
+  state.golfers.forEach(function (g) {
+    var r = getRound(g.id, courseId);
+    if (r && r.played && typeof r.score === 'number' && !isNaN(r.score)) {
+      if (!best || r.score < best.score) best = { score: r.score, name: g.name };
+    }
+  });
+  return best;
+}
+
+// ---------- Confirm modal ----------
+var pendingConfirm = null;
+function askConfirm(msg, onYes) {
+  pendingConfirm = onYes;
+  document.getElementById('modalMsg').textContent = msg;
+  document.getElementById('modalBack').hidden = false;
+}
+
+// ---------- Screens & drawer ----------
+var currentScreen = 'courses';
+function showScreen(name) {
+  currentScreen = name;
+  var map = { courses: 'screenCourses', progress: 'screenProgress', leaders: 'screenLeaders' };
+  var tabs = { courses: 'tabCourses', progress: 'tabProgress', leaders: 'tabLeaders' };
+  Object.keys(map).forEach(function (k) {
+    var el = document.getElementById(map[k]);
+    el.classList.remove('on');
+    document.getElementById(tabs[k]).classList.remove('on');
+  });
+  var scr = document.getElementById(map[name]);
+  void scr.offsetWidth; // restart animation
+  scr.classList.add('on');
+  document.getElementById(tabs[name]).classList.add('on');
+  render();
+  try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
+}
+function toggleDrawer(open) {
+  document.getElementById('drawer').classList.toggle('on', open);
+  document.getElementById('drawerBack').classList.toggle('on', open);
+}
+
+// ---------- Profile (one per device) ----------
+var profileTempPhoto = null;
+var onboarding = false;
+
+function openProfile() {
+  var g = me();
+  onboarding = !g;
+  profileTempPhoto = g && g.photo ? g.photo : null;
+  document.getElementById('pfTitle').textContent = onboarding ? '👤 Set Up Your Profile' : '👤 My Profile';
+  document.getElementById('pfIntro').textContent = onboarding
+    ? 'One profile per device — this will be you on this phone.'
+    : 'One profile per device — this is you on this phone.';
+  document.getElementById('pfName').value = g ? g.name : '';
+  document.getElementById('pfHandicap').value = (g && typeof g.handicap === 'number') ? g.handicap : '';
+  document.getElementById('pfClub').value = (g && g.club) ? g.club : '';
+  document.getElementById('pfCancel').hidden = onboarding;
+  renderProfilePhotoPreview(g);
+  document.getElementById('profileBack').hidden = false;
+}
+function renderProfilePhotoPreview(g) {
+  var btn = document.getElementById('pfPhotoBtn');
+  if (profileTempPhoto) btn.innerHTML = '<img class="av av-xl" src="' + profileTempPhoto + '" alt="">';
+  else btn.innerHTML = '<span class="av av-xl">' + esc(initials(g ? g.name : '?')) + '</span>';
+}
+function closeProfile() {
+  if (onboarding) return; // must finish setup
+  document.getElementById('profileBack').hidden = true;
+  profileTempPhoto = null;
+}
+function saveProfile() {
+  var name = document.getElementById('pfName').value.trim();
+  if (!name) { document.getElementById('pfName').placeholder = 'Name is required!'; return; }
+  var h = parseInt(document.getElementById('pfHandicap').value, 10);
+  var club = document.getElementById('pfClub').value.trim() || null;
+  var g = me();
+  if (!g) {
+    g = { id: 'me_' + Date.now(), name: name, photo: profileTempPhoto, handicap: null, club: null };
+    state.golfers.unshift(g);
+    state.meId = g.id;
+    state.activeGolferId = g.id;
+  } else {
+    g.name = name;
+    g.photo = profileTempPhoto;
+  }
+  g.handicap = (isNaN(h) || h < 0) ? null : h;
+  g.club = club;
+  saveState();
+  onboarding = false;
+  document.getElementById('profileBack').hidden = true;
+  document.getElementById('app').hidden = false;
+  render();
+}
+function handlePhotoFile(file) {
+  if (!file || !file.type || file.type.indexOf('image/') !== 0) return;
+  var reader = new FileReader();
+  reader.onload = function (ev) {
+    var img = new Image();
+    img.onload = function () {
+      var side = Math.min(img.width, img.height);
+      var sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+      var canvas = document.createElement('canvas');
+      canvas.width = 160; canvas.height = 160;
+      canvas.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, 160, 160);
+      profileTempPhoto = canvas.toDataURL('image/jpeg', 0.82);
+      renderProfilePhotoPreview(me());
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ---------- Actions ----------
+function addGolfer() {
+  var input = document.getElementById('drNewGolfer');
+  var name = input.value.trim();
+  if (!name) return;
+  var exists = state.golfers.some(function (g) { return g.name.toLowerCase() === name.toLowerCase(); });
+  if (exists) { input.value = ''; input.placeholder = 'Already added!'; return; }
+  state.golfers.push({ id: 'g_' + Date.now(), name: name });
+  input.value = '';
+  input.placeholder = 'Add golfer...';
+  saveState(); render();
+}
+function deleteGolfer(id) {
+  if (id === state.meId) return;
+  var g = findGolfer(id);
+  if (!g) return;
+  askConfirm('Remove "' + g.name + '"? Their progress and scores will be erased.', function () {
+    state.golfers = state.golfers.filter(function (x) { return x.id !== id; });
+    delete state.rounds[id];
+    if (state.activeGolferId === id) state.activeGolferId = state.meId;
+    saveState(); render();
+  });
+}
+function selectGolfer(id) {
+  state.activeGolferId = id;
+  saveState(); render();
+}
+
+function toggleCourse(courseId) {
+  var gid = state.activeGolferId;
+  if (!gid) return;
+  if (!state.rounds[gid]) state.rounds[gid] = {};
+  var r = state.rounds[gid][courseId];
+  if (r && r.played) delete state.rounds[gid][courseId];
+  else state.rounds[gid][courseId] = { played: true, score: null };
+  saveState(); render();
+}
+function setScore(courseId, value) {
+  var gid = state.activeGolferId;
+  if (!gid) return;
+  if (!state.rounds[gid]) state.rounds[gid] = {};
+  if (!state.rounds[gid][courseId]) state.rounds[gid][courseId] = { played: true, score: null };
+  var n = parseInt(value, 10);
+  state.rounds[gid][courseId].score = (isNaN(n) || n <= 0) ? null : n;
+  saveState();
+  renderCourses();
+}
+
+function openProvinceModal() {
+  var input = document.getElementById('pmName');
+  input.value = '';
+  input.placeholder = 'e.g. Bulacan';
+  document.getElementById('provBack').hidden = false;
+  input.focus();
+}
+function closeProvinceModal() { document.getElementById('provBack').hidden = true; }
+function saveProvinceModal() {
+  var input = document.getElementById('pmName');
+  var name = input.value.trim();
+  if (!name) { input.placeholder = 'Province name is required!'; return; }
+  var exists = state.provinces.some(function (p) { return p.toLowerCase() === name.toLowerCase(); });
+  if (exists) { input.value = ''; input.placeholder = 'Already listed!'; return; }
+  state.provinces.push(name);
+  closeProvinceModal();
+  saveState(); render();
+}
+function deleteProvince(name) {
+  var count = state.courses.filter(function (c) { return c.province === name; }).length;
+  var msg = count > 0
+    ? 'Remove "' + name + '" along with its ' + count + ' course(s)?'
+    : 'Remove the province "' + name + '"?';
+  askConfirm(msg, function () {
+    var removedIds = state.courses.filter(function (c) { return c.province === name; }).map(function (c) { return c.id; });
+    state.provinces = state.provinces.filter(function (p) { return p !== name; });
+    state.courses = state.courses.filter(function (c) { return c.province !== name; });
+    Object.keys(state.rounds).forEach(function (gid) {
+      removedIds.forEach(function (cid) { delete state.rounds[gid][cid]; });
+    });
+    saveState(); render();
+  });
+}
+// ---------- Course modal (add / edit, with photo thumbnail) ----------
+var courseEditingId = null, courseProvinceCtx = null, courseTempPhoto = null;
+function findCourse(id) {
+  for (var i = 0; i < state.courses.length; i++) if (state.courses[i].id === id) return state.courses[i];
+  return null;
+}
+function cropToJpeg(img, W, H, q) {
+  var tr = W / H, sx = 0, sy = 0, sw = img.width, sh = img.height;
+  if (sw / sh > tr) { sw = sh * tr; sx = (img.width - sw) / 2; }
+  else { sh = sw / tr; sy = (img.height - sh) / 2; }
+  var cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  cv.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+  return cv.toDataURL('image/jpeg', q);
+}
+function openCourseModal(province, courseId) {
+  courseEditingId = courseId || null;
+  var c = courseId ? findCourse(courseId) : null;
+  if (courseId && !c) return;
+  courseProvinceCtx = c ? c.province : province;
+  courseTempPhoto = (c && c.photo) ? c.photo : null;
+  document.getElementById('cmTitle').textContent = c ? '⛳ Edit Golf Course' : '⛳ Add Golf Course';
+  document.getElementById('cmProv').textContent = '📍 ' + courseProvinceCtx;
+  var nameInput = document.getElementById('cmName');
+  nameInput.value = c ? c.name : '';
+  nameInput.placeholder = 'e.g. Eagle Ridge Golf and Country Club';
+  document.getElementById('cmFirst').value = (c && c.firstPlayed) ? c.firstPlayed : '';
+  document.getElementById('cmNotes').value = (c && c.notes) ? c.notes : '';
+  renderCmPhoto();
+  document.getElementById('courseBack').hidden = false;
+}
+function renderCmPhoto() {
+  var el = document.getElementById('cmPhotoBtn');
+  if (courseTempPhoto) {
+    el.classList.add('has');
+    el.style.backgroundImage = "url('" + courseTempPhoto + "')";
+    el.textContent = '';
+  } else {
+    el.classList.remove('has');
+    el.style.backgroundImage = '';
+    el.textContent = '📷 Tap to add a thumbnail photo';
+  }
+}
+function closeCourseModal() {
+  document.getElementById('courseBack').hidden = true;
+  courseEditingId = null; courseTempPhoto = null;
+}
+function saveCourseModal() {
+  var nameInput = document.getElementById('cmName');
+  var name = nameInput.value.trim();
+  if (!name) { nameInput.placeholder = 'Course name is required!'; return; }
+  var first = document.getElementById('cmFirst').value || null;
+  var notes = document.getElementById('cmNotes').value.trim() || null;
+  if (courseEditingId) {
+    var c = findCourse(courseEditingId);
+    if (c) { c.name = name; c.photo = courseTempPhoto; c.firstPlayed = first; c.notes = notes; }
+  } else {
+    state.courses.push({ id: 'custom_' + Date.now(), name: name, province: courseProvinceCtx, photo: courseTempPhoto, firstPlayed: first, notes: notes });
+  }
+  saveState();
+  closeCourseModal();
+  render();
+}
+function handleCoursePhoto(file) {
+  if (!file || !file.type || file.type.indexOf('image/') !== 0) return;
+  var reader = new FileReader();
+  reader.onload = function (ev) {
+    var img = new Image();
+    img.onload = function () {
+      courseTempPhoto = cropToJpeg(img, 480, 552, 0.78);
+      renderCmPhoto();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function deleteCourse(courseId) {
+  var c = null;
+  state.courses.forEach(function (x) { if (x.id === courseId) c = x; });
+  if (!c) return;
+  askConfirm('Remove "' + c.name + '"?', function () {
+    state.courses = state.courses.filter(function (x) { return x.id !== courseId; });
+    Object.keys(state.rounds).forEach(function (gid) { delete state.rounds[gid][courseId]; });
+    saveState(); render();
+  });
+}
+function resetAll() {
+  askConfirm('Are you sure? This erases EVERYTHING on this device — your profile, golfers, progress, scores, and custom courses.', function () {
+    storeDel(STORAGE_KEY);
+    storeDel(GUIDE_KEY);
+    state = { meId: null, golfers: [], activeGolferId: null, provinces: INITIAL_PROVINCES.slice(), courses: INITIAL_COURSES.map(function (c) { return Object.assign({}, c); }), rounds: {} };
+    document.getElementById('app').hidden = true;
+    document.getElementById('guideSteps').hidden = true;
+    document.getElementById('guideWelcome').hidden = false;
+    document.getElementById('guide').hidden = false;
+  });
+}
+
+// ---------- Install guide ----------
+function isDesktop() { return !('ontouchstart' in window) && window.innerWidth >= 900; }
+function showPlatform(p) {
+  document.getElementById('stepsAndroid').hidden = (p !== 'android');
+  document.getElementById('stepsIphone').hidden = (p !== 'iphone');
+  document.getElementById('tabAndroid').classList.toggle('active', p === 'android');
+  document.getElementById('tabIphone').classList.toggle('active', p === 'iphone');
+}
+function openGuide() {
+  document.getElementById('guide').hidden = false;
+  document.getElementById('guideWelcome').hidden = true;
+  document.getElementById('guideSteps').hidden = false;
+  prepGuideButtons();
+}
+function guideNext() {
+  document.getElementById('guideWelcome').hidden = true;
+  document.getElementById('guideSteps').hidden = false;
+  prepGuideButtons();
+  window.scrollTo(0, 0);
+}
+function prepGuideButtons() {
+  document.getElementById('btnDesktop').hidden = !isDesktop();
+  document.getElementById('btnProceed').hidden = isDesktop();
+  var ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod|Macintosh/.test(ua)) showPlatform('iphone'); else showPlatform('android');
+}
+// One-tap install (fires only when the app is served as a real PWA, e.g. Chrome on Android)
+var deferredInstall = null;
+function installNow() {
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall = null;
+    var b = document.getElementById('btnInstallNow');
+    if (b) b.hidden = true;
+  }
+}
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  deferredInstall = e;
+  var b = document.getElementById('btnInstallNow');
+  if (b) b.hidden = false;
+});
+function isStandaloneApp() {
+  try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; }
+}
+function finishGuide() {
+  storeSet(GUIDE_KEY, '1');
+  document.getElementById('guide').hidden = true;
+  if (!me()) {
+    openProfile(); // onboarding: must create the device profile
+  } else {
+    document.getElementById('app').hidden = false;
+    render();
+  }
+}
+
+// ---------- Render ----------
+function renderTop() {
+  var g = me();
+  document.getElementById('topAvatar').innerHTML = avatarHtml(g, 'av-md');
+}
+function renderTracking() {
+  var el = document.getElementById('trackingChip');
+  var a = activeGolfer();
+  if (a && a.id !== state.meId) {
+    el.innerHTML = '<span class="tracking-chip">✍️ Checking courses for: <b>' + esc(a.name) + '</b></span>';
+  } else {
+    el.innerHTML = '';
+  }
+}
+function renderFeatured() {
+  var el = document.getElementById('featCard');
+  var g = activeGolfer();
+  if (!g) { el.innerHTML = ''; return; }
+  var total = state.courses.length;
+  var played = playedCount(g.id);
+  var left = total - played;
+  var isMe = g.id === state.meId;
+  var head = isMe ? ('Hello, ' + esc(g.name.split(' ')[0]) + '! 👋') : ('Tracking ' + esc(g.name));
+  var line = played === 0
+    ? 'Time to tee off — ' + total + ' courses are waiting!'
+    : (left === 0
+      ? 'All ' + total + ' courses conquered! 🏆'
+      : played + ' played · ' + left + ' courses to go!');
+  el.innerHTML =
+    '<img class="ph" src="featured.jpg" alt="">' +
+    '<div class="fx">' +
+      '<span class="hi">' + head + '</span>' +
+      '<b>' + line + '</b>' +
+      '<div class="cta"><button class="btn btn-green btn-sm" onclick="showScreen(\'progress\')">View Progress ➜</button></div>' +
+    '</div>';
+}
+function renderCourses() {
+  renderTracking();
+  renderFeatured();
+  var wrap = document.getElementById('provincesWrap');
+  var gid = state.activeGolferId;
+  wrap.innerHTML = state.provinces.map(function (prov, pi) {
+    var courses = state.courses.filter(function (c) { return c.province === prov; });
+    var playedHere = 0;
+    if (gid) courses.forEach(function (c) { var r = getRound(gid, c.id); if (r && r.played) playedHere++; });
+
+    var cards = courses.map(function (c, ci) {
+      var r = gid ? getRound(gid, c.id) : null;
+      var played = !!(r && r.played);
+      var top = topScoreFor(c.id);
+      var scoreVal = (r && typeof r.score === 'number') ? r.score : '';
+      return '<div class="ccard' + (played ? ' played' : '') + '" style="background-image:url(\'' + (c.photo || photoFor(c.id)) + '\')">' +
+        '<div class="grad"></div>' +
+        '<div class="cc-top">' +
+          '<span style="display:flex;gap:6px">' +
+            '<button class="cc-del" title="Remove course" onclick="deleteCourse(\'' + c.id + '\')">✕</button>' +
+            '<button class="cc-edit" title="Edit course" onclick="openCourseModal(null, \'' + c.id + '\')">✎</button>' +
+          '</span>' +
+          '<button class="cc-check" title="' + (played ? 'Unmark as played' : 'Mark as played') + '" onclick="toggleCourse(\'' + c.id + '\')">✓</button>' +
+        '</div>' +
+        '<div class="cc-body">' +
+          '<div class="cc-prov">' + esc(prov) + '</div>' +
+          '<div class="cc-name">' + esc(c.name) + '</div>' +
+          (c.firstPlayed ? '<div class="cc-first">🗓 First played: ' + esc(c.firstPlayed) + '</div>' : '') +
+          '<div class="cc-meta">' +
+            (played
+              ? '<span class="score-chip">Score <input type="number" id="score-' + c.id + '" min="1" max="200" placeholder="—" value="' + scoreVal + '" onchange="setScore(\'' + c.id + '\', this.value)"></span>'
+              : '') +
+            (top ? '<span class="top-chip" title="Lowest score on this course">🏅 ' + top.score + ' · ' + esc(top.name) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var addCard = '<div class="ccard add" onclick="openCourseModal(\'' + jsArg(prov) + '\')"><div><span class="plus">＋</span>Add course</div></div>';
+
+    return '<div class="sec-head" style="animation: rise 0.4s ease both; animation-delay:' + (pi * 0.05) + 's">' +
+        '<h2>📍 ' + esc(prov) + '</h2>' +
+        '<span class="count-pill">' + playedHere + '/' + courses.length + '</span>' +
+        '<button class="mini-btn danger" title="Remove province" onclick="deleteProvince(\'' + jsArg(prov) + '\')">✕</button>' +
+      '</div>' +
+      '<div class="slider">' + cards + addCard + '</div>';
+  }).join('');
+}
+
+function renderProgress() {
+  var el = document.getElementById('screenProgress');
+  var g = activeGolfer();
+  if (!g) { el.innerHTML = '<div class="card glass"><div class="empty-note">Set up your profile first.</div></div>'; return; }
+  var total = state.courses.length;
+  var played = playedCount(g.id);
+  var pct = total === 0 ? 0 : Math.round((played / total) * 100);
+  var isMe = g.id === state.meId;
+  var subBits = [];
+  if (isMe && typeof g.handicap === 'number') subBits.push('Handicap ' + g.handicap);
+  if (isMe && g.club) subBits.push(esc(g.club));
+  if (!isMe) subBits.push('Tracked golfer on this device');
+  var provRows = state.provinces.map(function (prov) {
+    var cs = state.courses.filter(function (c) { return c.province === prov; });
+    if (!cs.length) return '';
+    var ph = 0;
+    cs.forEach(function (c) { var r = getRound(g.id, c.id); if (r && r.played) ph++; });
+    var ppct = Math.round((ph / cs.length) * 100);
+    return '<div class="pv-row">' +
+      '<div class="pv-top"><span>📍 ' + esc(prov) + '</span><span>' + ph + '/' + cs.length + '</span></div>' +
+      '<div class="bar"><div style="width:' + ppct + '%"></div></div>' +
+      '</div>';
+  }).join('');
+  var playedRows = state.courses.filter(function (c) {
+    var r = getRound(g.id, c.id); return r && r.played;
+  }).map(function (c) {
+    var r = getRound(g.id, c.id);
+    var top = topScoreFor(c.id);
+    var isTop = top && r && top.score === r.score && typeof r.score === 'number';
+    return '<div class="played-row">' +
+      '<span>⛳</span><span class="nm">' + esc(c.name) + '</span>' +
+      (typeof r.score === 'number' ? '<span class="sc">' + r.score + (isTop ? ' 🏅' : '') + '</span>' : '<span class="sc" style="color:var(--muted)">—</span>') +
+      '</div>';
+  }).join('');
+  el.innerHTML =
+    '<div class="card glass">' +
+      '<div class="pr-head">' +
+        avatarHtml(g, 'av-lg') +
+        '<div class="who"><b>' + esc(g.name) + '</b><span class="sub">' + (subBits.join(' · ') || 'No profile info yet') + '</span></div>' +
+        (isMe ? '<button class="btn btn-ghost btn-sm" onclick="openProfile()">Edit</button>' : '') +
+      '</div>' +
+      '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:14px">' +
+        '<span class="big-pct">' + pct + '%<small> complete</small></span>' +
+        '<span style="font-size:0.84rem;color:var(--muted);font-variant-numeric:tabular-nums"><b style="color:var(--accent)">' + played + '</b> / ' + total + ' courses</span>' +
+      '</div>' +
+      '<div class="bar"><div style="width:' + pct + '%"></div></div>' +
+    '</div>' +
+    '<div class="card glass"><div class="sec-head"><h2>📍 By Province</h2></div>' + (provRows || '<div class="empty-note">No provinces yet.</div>') + '</div>' +
+    '<div class="card glass"><div class="sec-head"><h2>⛳ Courses Played</h2></div>' + (playedRows || '<div class="empty-note">No courses checked yet — go to the Courses tab and start ticking!</div>') + '</div>';
+}
+
+function renderLeaders() {
+  var el = document.getElementById('screenLeaders');
+  var ranked = state.golfers.map(function (g) {
+    return { id: g.id, name: g.name, photo: g.photo, count: playedCount(g.id) };
+  }).sort(function (a, b) { return b.count - a.count; });
+  var rows = ranked.map(function (g, i) {
+    var first = i === 0 && g.count > 0;
+    var isMe = g.id === state.meId;
+    return '<div class="lb-row glass' + (first ? ' first' : '') + '" style="animation-delay:' + (i * 0.05) + 's">' +
+      '<span class="lb-rank">' + (i + 1) + '</span>' +
+      avatarHtml(g, 'av-sm') +
+      '<span class="lb-name">' + (first ? '👑 ' : '') + esc(g.name) + (isMe ? ' <span class="you">(You)</span>' : '') + '</span>' +
+      '<span class="lb-count"><b>' + g.count + '</b> played</span>' +
+      (isMe ? '' : '<button class="lb-x" title="Remove golfer" onclick="deleteGolfer(\'' + g.id + '\')">✕</button>') +
+      '</div>';
+  }).join('');
+  el.innerHTML =
+    '<div class="note-box">🏆 Who has played the most courses? Add your golf buddies from the ☰ menu and tick courses for them. Records live on this device only.</div>' +
+    (rows || '<div class="card glass"><div class="empty-note">No golfers yet.</div></div>');
+}
+
+function renderDrawer() {
+  var g = me();
+  document.getElementById('drawerMe').innerHTML =
+    avatarHtml(g, 'av-lg') +
+    '<div class="who"><b>' + esc(g ? g.name : 'No profile') + '</b><span>' +
+    (g && typeof g.handicap === 'number' ? 'Handicap ' + g.handicap : 'This device\'s golfer') + '</span></div>';
+  document.getElementById('drawerGolfers').innerHTML = state.golfers.map(function (x) {
+    var on = x.id === state.activeGolferId;
+    var isMe = x.id === state.meId;
+    return '<div class="dr-golfer' + (on ? ' on' : '') + '" onclick="selectGolfer(\'' + x.id + '\')">' +
+      avatarHtml(x, 'av-xs') +
+      '<span class="nm">' + esc(x.name) + (isMe ? ' (You)' : '') + '</span>' +
+      '<span style="font-size:0.72rem;color:var(--muted);font-variant-numeric:tabular-nums">' + playedCount(x.id) + '</span>' +
+      '<span class="tick">✓</span>' +
+      (isMe ? '' : '<button class="x" title="Remove" onclick="event.stopPropagation();deleteGolfer(\'' + x.id + '\')">✕</button>') +
+      '</div>';
+  }).join('');
+}
+
+function render() {
+  renderTop();
+  renderDrawer();
+  if (currentScreen === 'courses') renderCourses();
+  else if (currentScreen === 'progress') renderProgress();
+  else renderLeaders();
+}
+
+// ---------- Boot ----------
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('modalCancel').addEventListener('click', function () {
+    pendingConfirm = null;
+    document.getElementById('modalBack').hidden = true;
+  });
+  document.getElementById('modalOk').addEventListener('click', function () {
+    var fn = pendingConfirm; pendingConfirm = null;
+    document.getElementById('modalBack').hidden = true;
+    if (fn) fn();
+  });
+  document.getElementById('pfPhotoBtn').addEventListener('click', function () {
+    document.getElementById('pfPhotoInput').click();
+  });
+  document.getElementById('pfPhotoInput').addEventListener('change', function (e) {
+    handlePhotoFile(e.target.files && e.target.files[0]);
+    e.target.value = '';
+  });
+  document.getElementById('drNewGolfer').addEventListener('keydown', function (e) { if (e.key === 'Enter') addGolfer(); });
+  document.getElementById('pmName').addEventListener('keydown', function (e) { if (e.key === 'Enter') saveProvinceModal(); });
+  document.getElementById('cmName').addEventListener('keydown', function (e) { if (e.key === 'Enter') saveCourseModal(); });
+  document.getElementById('cmPhotoBtn').addEventListener('click', function () {
+    document.getElementById('cmPhotoInput').click();
+  });
+  document.getElementById('cmPhotoInput').addEventListener('change', function (e) {
+    handleCoursePhoto(e.target.files && e.target.files[0]);
+    e.target.value = '';
+  });
+
+  loadState();
+  if (isStandaloneApp()) storeSet(GUIDE_KEY, '1'); // already installed: skip the install gate
+  if (storeGet(GUIDE_KEY) !== '1') {
+    document.getElementById('guide').hidden = false;
+  } else if (!me()) {
+    openProfile();
+  } else {
+    document.getElementById('app').hidden = false;
+    render();
+  }
+});
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
